@@ -25,37 +25,37 @@ export default function Home() {
 
       <div className='w-2/3 bg-slate-200/60 dark:bg-slate-800/100 mx-auto rounded-lg opacity-90 p-5 overflow-x-hidden ' style={{ minWidth: 280 }}>
         <h1 className="text-2xl font-bold text-gray-800 mb-5 bg-blue-100 dark:text-neutral-200 dark:bg-slate-500 p-3 rounded-lg">ノート</h1>
-        <CopyBlock
+        <div className='text-black'><CopyBlock
           // @ts-ignore
           text={'<iframe src="https://missbed.misskey.stream/note/{instance}/{note_id}" />'}
           language={'tsx'}
           showLineNumbers={true}
           theme={{ ...ocean }}
           codeBlock
-        />
+        /></div>
         <iframe src='/note/misskey.stream/9p4y4lg5lr' width={'100%'} height={350}></iframe>
         <br/>
         <h2 className="text-2xl font-bold text-gray-800 mb-5 bg-blue-50 dark:text-neutral-200 dark:bg-slate-500 p-3 rounded-lg">タイムライン</h2>
-                <CopyBlock
+        <div className='text-black'><CopyBlock
           // @ts-ignore
           text={'<iframe src="https://missbed.misskey.stream/timeline/{instance}/{user_id}" />'}
           language={'tsx'}
           showLineNumbers={true}
           theme={{ ...ocean }}
           codeBlock
-        />
+        /></div>
         <div className='flex justify-center'>
         <iframe className="" src='/timeline/misskey.stream/9p0tg0nuzo' width={'50%'} height={700}></iframe>
         </div><br/>
         <h2 className="text-2xl font-bold text-gray-800 mb-5 bg-blue-100 dark:text-neutral-200 dark:bg-slate-500 p-3 rounded-lg">タイムボード(使用不推奨)</h2>
-        <CopyBlock
+        <div className='text-black'><CopyBlock
           // @ts-ignore
           text={'<iframe src="https://missbed.misskey.stream/timeboard/{instance}/{user_id}" />'}
           language={'tsx'}
           showLineNumbers={true}
           theme={{ ...ocean }}
           codeBlock
-        />
+        /></div>
         <iframe src='/timeboard/misskey.stream/9p0tg0nuzo' width={'100%'} height={1000}></iframe>
 
       </div>
