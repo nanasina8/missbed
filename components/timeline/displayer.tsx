@@ -3,8 +3,11 @@
 import NoteDisplayer from '../note/displayer'
 import { useState } from 'react'
 import { fetchUserNotes } from '@/lib/misskey'
-import { Note as NoteType } from 'misskey-js/built/entities'
+import { Note as NoteType } from 'misskey-js/built/dts/autogen/models'
+
 import { OgObject } from 'open-graph-scraper/dist/lib/types'
+
+
 
 export default function TimelineDisplayer({ notes, id, instance, boardly = false, ogs }: {
     notes: NoteType[],

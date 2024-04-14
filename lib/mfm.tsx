@@ -1,7 +1,8 @@
 import { MfmNode, toString, parse } from 'mfm-js'
-import Image from 'next/image'
 import { ReactNode } from 'react'
 import { CopyBlock, github } from 'react-code-blocks'
+import React, { useState, useEffect } from 'react';
+import EmojiImage from './EmojiImage'; 
 
 export default class MfmConverter {
     instance: string = 'misskey.io'
@@ -32,14 +33,31 @@ export default class MfmConverter {
             // no children
             case 'mention':
                 return <a className='text-link' href={`https://${node.props.host ?? this.instance}/@${node.props.username}`} target='_blank' rel='noreferrer'>{node.props.acct}</a>
-            case 'url':
-                const { url } = node.props
-                const [protocol, empty, host, ...paths] = url.split('/')
-                return (<a href={url} target='_blank' rel='noreferrer' className='text-link font-mono'>
-                    <span className='opacity-60 text-sm'>{`${protocol}//`}</span>
-                    <span className='font-bold'>{host}</span>
-                    <span className='opacity-80 text-sm'>/{paths.join('/')}</span>
-                </a>)
+        
+            case 'url': {
+                const { url } = node.props;
+                // 画像ファイルの拡張子リスト
+                const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
+                // URLが画像ファイルを指しているかどうかをチェック
+                const isImage = imageExtensions.some(ext => url.endsWith(ext));
+                
+                    // URLが画像ファイルの場合
+                if (isImage) {
+                    return (
+                            <img src={url} alt="preview" style={{ maxWidth: '100px', maxHeight: '100px' }} />
+                        );
+                } else {
+                    // 画像ファイルでない場合は、URLをテキストリンクとして表示
+                    const [protocol, , host, ...paths] = url.split('/');
+                    return (
+                        <a href={url} target='_blank' rel='noreferrer' className='text-link font-mono'>
+                            <span className='opacity-60 text-sm'>{`${protocol}//`}</span>
+                            <span className='font-bold'>{host}</span>
+                            <span className='opacity-80 text-sm'>/{paths.join('/')}</span>
+                        </a>
+                        );
+                    }
+                }                
             case 'hashtag':
                 return <a className='text-link' href={`https://${this.instance}/tags/${node.props.hashtag}`} target='_blank' rel='noreferrer'>#{node.props.hashtag}</a>
             case 'text':
@@ -56,8 +74,19 @@ export default class MfmConverter {
             case 'inlineCode':
                 return <code>{node.props.code}</code>
             case 'emojiCode':
-                const src = this?.emojis?.find(emoji => emoji.name === node.props.name)?.url
-                return src ? <Image alt={node.props.name} src={src} width={20} height={20} className='align-middle mx-1'></Image> : <>{toString(node)}</>
+                const emojiName = node.props.name;
+                return <EmojiImage emojiName={emojiName} instance={this.instance} />;
+            case 'fn':
+                const childText = node.children.map(child => {
+                if (child.type === 'text') {
+                    return child.props.text;
+                } else {
+                    return toString(child); // 子ノードがテキスト以外の場合、toStringを使用して文字列に変換
+                }
+                }).join(''); // 複数の子ノードがある場合は連結
+
+            return <span>{childText}</span>;
+
 
             default:
                 return <>{toString(node)}</>
@@ -66,18 +95,26 @@ export default class MfmConverter {
 
     recur(node: MfmNode[] | MfmNode): ReactNode {
         if (Array.isArray(node)) {
-            return node.map(node => this.recur(node))
-        }
-        else {
-            const { children } = node
-            if (children)
-                return this.toReact(node, this.recur(children))
-            else
-                return this.toReact(node, <></>)
+            return node.map(node => this.recur(node));
+        } else {
+            const { children } = node;
+            if (children) {
+                // childrenがnullまたはundefinedでないことを確認
+                return this.toReact(node, this.recur(children));
+            } else {
+                // childrenがnullまたはundefinedの場合、空のフラグメントを渡す
+                return this.toReact(node, <></>);
+            }
         }
     }
 
     convert(text: string) {
-        return this.recur(parse(text))
+        const parsed = parse(text);
+        if (!parsed) {
+        console.error('Parsed result is null or undefined.');
+          return null; // または適切なデフォルト値
+        }
+        // parsedが有効な場合のみ処理を続ける
+        return this.recur(parsed);
     }
 }
